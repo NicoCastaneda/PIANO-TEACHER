@@ -1,0 +1,209 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Archivo de canción de Piano Coach",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "format": {
+      "type": "string",
+      "const": "piano-coach-song/1"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{0,63}$",
+      "description": "Identificador estable; igual al nombre del archivo sin .json"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artist": {
+      "type": "string"
+    },
+    "request": {
+      "description": "La petición original del usuario (trazabilidad)",
+      "type": "string"
+    },
+    "createdAt": {
+      "description": "Fecha ISO de creación",
+      "type": "string"
+    },
+    "key": {
+      "type": "string",
+      "description": "Tonalidad, p. ej. \"A major\" o \"F# minor\""
+    },
+    "bpm": {
+      "type": "number",
+      "minimum": 20,
+      "maximum": 300,
+      "description": "Tempo en negras por minuto"
+    },
+    "timeSignature": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16
+        },
+        {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        }
+      ],
+      "items": false,
+      "minItems": 2,
+      "maxItems": 2,
+      "description": "[numerador, denominador], p. ej. [4,4]"
+    },
+    "arrangementType": {
+      "type": "string",
+      "enum": [
+        "ai-generated",
+        "didactic-adaptation"
+      ],
+      "description": "\"didactic-adaptation\" solo si se basa en una fuente musical real (dominio público, oficial o con licencia); si no, \"ai-generated\""
+    },
+    "isPublicDomain": {
+      "type": "boolean"
+    },
+    "melodyIncluded": {
+      "type": "boolean",
+      "description": "true solo si la mano derecha reproduce la melodía real"
+    },
+    "confidenceHarmony": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "0–1: confianza en tonalidad y acordes según las fuentes"
+    },
+    "confidenceMelody": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "0–1: confianza en la melodía (0 si no se incluye)"
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "url": {
+            "type": "string",
+            "description": "URL de la fuente consultada, o cadena vacía si no hay"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "official",
+              "licensed",
+              "public-domain",
+              "reference-info",
+              "model-knowledge"
+            ]
+          },
+          "usedFor": {
+            "type": "string",
+            "description": "Qué dato se tomó de esta fuente (tonalidad, acordes, tempo…)"
+          }
+        },
+        "required": [
+          "title",
+          "url",
+          "kind",
+          "usedFor"
+        ]
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "adaptations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "recommendedStartLevel": {
+      "type": "string",
+      "enum": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ]
+    },
+    "teachingNotes": {
+      "type": "string",
+      "description": "Consejos breves para aprender la pieza"
+    },
+    "sections": {
+      "minItems": 1,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Nombre de la sección: Intro, Estrofa, Estribillo…"
+          },
+          "bars": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 64,
+            "description": "Número de compases de la sección"
+          },
+          "chords": {
+            "type": "string",
+            "description": "Acordes con duración en negras, p. ej. \"C:4 G:4 Am:2 F:2\". Debe sumar bars × longitud de compás."
+          },
+          "rightHand": {
+            "type": "string",
+            "description": "Mano derecha: \"Nota[alteración]Octava[:duración]\"; \"r\" = silencio; \"+\" une notas simultáneas; \"|\" opcional. Debe sumar la longitud de la sección."
+          },
+          "leftHand": {
+            "type": "string",
+            "description": "Mano izquierda, misma notación. Debe sumar la longitud de la sección."
+          }
+        },
+        "required": [
+          "name",
+          "bars",
+          "chords",
+          "rightHand",
+          "leftHand"
+        ]
+      }
+    }
+  },
+  "required": [
+    "format",
+    "id",
+    "title",
+    "artist",
+    "key",
+    "bpm",
+    "timeSignature",
+    "arrangementType",
+    "isPublicDomain",
+    "melodyIncluded",
+    "confidenceHarmony",
+    "confidenceMelody",
+    "sources",
+    "limitations",
+    "adaptations",
+    "recommendedStartLevel",
+    "teachingNotes",
+    "sections"
+  ]
+}

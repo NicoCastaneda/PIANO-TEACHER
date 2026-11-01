@@ -1,0 +1,7 @@
+node_modules
+dist
+.env
+*.local
+node_modules/.tmp
+e2e/screenshots
+.claude/settings.local.json

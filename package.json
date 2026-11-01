@@ -1,0 +1,47 @@
+{
+  "name": "piano-coach",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Personal Piano Coach – entorno de aprendizaje de piano conectado al Casio CT-S300 por USB-MIDI",
+  "scripts": {
+    "dev": "vite",
+    "build": "npm run typecheck && vite build",
+    "preview": "vite preview",
+    "start": "vite preview",
+    "typecheck": "tsc -p tsconfig.app.json && tsc -p tsconfig.node.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "node e2e/smoke.mjs && node e2e/timed.mjs && node e2e/songfile.mjs && node e2e/chords.mjs",
+    "cancion:validar": "tsx scripts/cancion.ts validar",
+    "cancion:esquema": "tsx scripts/cancion.ts esquema",
+    "progreso:resumen": "tsx scripts/progreso.ts"
+  },
+  "dependencies": {
+    "@tonejs/midi": "^2.0.28",
+    "idb": "^8.0.4",
+    "lucide-react": "^1.66.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "tone": "^15.1.22",
+    "zod": "^4.6.7",
+    "zustand": "^5.0.16"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/react": "^16.3.3",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "fake-indexeddb": "^6.2.7",
+    "jsdom": "^30.1.3",
+    "playwright": "^1.64.1",
+    "tailwindcss": "^4.3.3",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.5",
+    "vitest": "^5.0.5"
+  }
+}
