@@ -1,6 +1,8 @@
 import { audioEngine } from '../core/audio/AudioEngine'
 import { emitNote, inputBus } from '../core/midi/inputBus'
 import { midiService } from '../core/midi/MidiService'
+import { useChordTrainer } from '../state/chordTrainer'
+import { useEarTrainer } from '../state/earTrainer'
 import { useLibrary, useProgress } from '../state/library'
 import { useSettings } from '../state/settings'
 
@@ -25,7 +27,7 @@ export function getComputerOctave() {
 
 export async function bootstrap() {
   await useSettings.getState().load()
-  await Promise.all([useLibrary.getState().load(), useProgress.getState().load()]).catch((e) => console.error('[db]', e))
+  await Promise.all([useLibrary.getState().load(), useProgress.getState().load(), useChordTrainer.getState().load(), useEarTrainer.getState().load()]).catch((e) => console.error('[db]', e))
   const apply = () => {
     const s = useSettings.getState()
     document.documentElement.dataset.theme = s.theme

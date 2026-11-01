@@ -7,11 +7,12 @@ const errors = []
 page.on('pageerror', (e) => errors.push(e.message))
 page.on('console', (m) => m.type() === 'error' && errors.push(m.text()))
 
-// Teclas del ordenador para C, F y G mayor (octava de Do central) en cada inversión
+// Teclas del ordenador para C, F y G mayor (octava de Do central) en cada inversión.
+// Sol mayor en 1.ª inversión (Si-Re-Sol) no cabe en la fila del teclado del ordenador: null.
 const KEYS = {
   'Do mayor': [['KeyA', 'KeyD', 'KeyG'], ['KeyD', 'KeyG', 'KeyK'], ['KeyG', 'KeyK', 'Semicolon']],
   'Fa mayor': [['KeyF', 'KeyH', 'KeyK'], ['KeyH', 'KeyK', 'Semicolon'], ['KeyA', 'KeyF', 'KeyH']],
-  'Sol mayor': [['KeyG', 'KeyJ', 'KeyL'], ['KeyJ', 'KeyL', 'KeyO'], ['KeyS', 'KeyG', 'KeyJ']],
+  'Sol mayor': [['KeyG', 'KeyJ', 'KeyL'], null, ['KeyS', 'KeyG', 'KeyJ']],
 }
 const INV = { 'Estado fundamental': 0, '1.ª inversión': 1, '2.ª inversión': 2 }
 
@@ -59,7 +60,7 @@ await page.keyboard.press('KeyX')
 await page.getByRole('button', { name: 'Mano derecha' }).click()
 await page.waitForTimeout(1300)
 
-// Examen: 5 preguntas, solo fundamental, grupo f1; la primera con la inversión equivocada
+// Examen: 5 preguntas, solo fundamental, grupo f1; la primera con la inversión equivocada (la 2.ª)
 await page.goto(`${BASE}/#/learn/acordes?tab=examen`)
 await page.getByRole('button', { name: 'Solo fundamental' }).click()
 await page.getByRole('button', { name: '5', exact: true }).click()
@@ -67,7 +68,7 @@ await page.getByRole('button', { name: /Empezar examen/ }).click()
 for (let i = 0; i < 5; i++) {
   await page.getByText(`Pregunta ${i + 1} / 5`).waitFor()
   const p = await prompt(main)
-  await play(KEYS[p.name][i === 0 ? 1 : p.inv])
+  await play(KEYS[p.name][i === 0 ? 2 : p.inv])
   await page.waitForTimeout(i === 0 ? 1900 : 900)
 }
 await page.getByText('de 100').waitFor()

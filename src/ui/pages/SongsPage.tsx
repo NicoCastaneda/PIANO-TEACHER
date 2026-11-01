@@ -1,6 +1,7 @@
-import { AlertTriangle, ArrowLeft, Check, Copy, ExternalLink, FileMusic, Music, ShieldCheck, Sparkles, Terminal, Trash2, Upload } from 'lucide-react'
+import { AlertTriangle, ArrowLeft, Hand, Check, Copy, ExternalLink, FileMusic, Music, ShieldCheck, Sparkles, Terminal, Trash2, Upload } from 'lucide-react'
 import { useMemo, useRef, useState } from 'react'
 import { recommendedDifficulty } from '../../core/progress/stats'
+import { canAccompany } from '../../core/songs/accompaniment'
 import { makeDifficultyVersion } from '../../core/songs/adapt'
 import { BUILTIN_NOTE, BUILTIN_SONGS } from '../../core/songs/library'
 import { importMidiFile } from '../../core/songs/midiImport'
@@ -252,6 +253,11 @@ function SongCard({ song, onDelete, level }: { song: Arrangement; onDelete?: () 
         <TypeBadge type={song.arrangementType} />
         {song.key && <span className="chip">{song.key}</span>}
         {best !== null && <span className="chip">Mejor: {Math.round(best)}</span>}
+        {canAccompany(song) && (
+          <a href={href(`/songs/${song.id}/acompanar`)} className="chip relative z-10 ml-auto hover:border-accent" title="Acompañar con cifrados" style={{ color: 'var(--lh)' }}>
+            <Hand size={11} style={{ transform: 'scaleX(-1)' }} /> Acompañar
+          </a>
+        )}
       </div>
     </div>
   )
@@ -305,6 +311,14 @@ export function SongPage({ songId, sectionId }: { songId: string; sectionId: str
           defaultMode={level === 'beginner' ? 'wait' : 'timed'}
         />
         <aside className="space-y-4">
+          {canAccompany(full) && (
+            <a href={href(`/songs/${songId}/acompanar`)} className="card block space-y-1 p-4 transition-colors hover:border-accent">
+              <div className="flex items-center gap-2 font-bold">
+                <Hand size={16} style={{ color: 'var(--lh)', transform: 'scaleX(-1)' }} /> Acompañar con cifrados
+              </div>
+              <p className="text-xs text-muted">Solo los acordes ({[...new Set(full.chords.map((c) => c.symbol))].slice(0, 5).join(' · ')}…): la app toca la melodía y tú acompañas con la izquierda.</p>
+            </a>
+          )}
           <div className="card space-y-3 p-4">
             <div className="label">Esta versión</div>
             <div className="flex flex-wrap gap-1.5 text-xs">

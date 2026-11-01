@@ -12,7 +12,7 @@
     "typecheck": "tsc -p tsconfig.app.json && tsc -p tsconfig.node.json",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "node e2e/smoke.mjs && node e2e/timed.mjs && node e2e/songfile.mjs && node e2e/chords.mjs",
+    "test:e2e": "node e2e/smoke.mjs && node e2e/timed.mjs && node e2e/songfile.mjs && node e2e/chords.mjs && node e2e/today.mjs",
     "cancion:validar": "tsx scripts/cancion.ts validar",
     "cancion:esquema": "tsx scripts/cancion.ts esquema",
     "progreso:resumen": "tsx scripts/progreso.ts"

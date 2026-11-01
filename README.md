@@ -122,6 +122,31 @@ Para dudas de teoría o sobre una lección, pregúntale directamente a Claude Co
 - **Examen**: preguntas sin ayudas de los grupos elegidos. Correcta = 1 punto, notas bien con otra inversión = 0,5, resto = 0. Se guarda en *Progreso* y permite repasar con tarjetas las que fallaste.
 - **Progresiones**: 13 progresiones (pop, baladas, doo-wop, bajo descendente, Canon, flamenco, rock, blues, jazz, neo-soul, gospel) en cualquier tonalidad, con tres repartos de manos: *izquierda bajo + derecha acordes*, *acordes con la izquierda* (derecha libre para la melodía) o *acordes con la derecha*. La mano de los acordes usa la inversión que menos movimiento exige. Se practican con el reproductor (modo guiado o con tempo).
 
+### Práctica de hoy (Inicio → *Práctica de hoy*, ruta `#/hoy`)
+
+Una rutina guiada de unos 15 minutos en 5 pasos, elegidos **solo con tus resultados registrados** (código: `src/core/daily/plan.ts`):
+
+1. **Repaso de acordes**: las tarjetas en cajas bajas del repaso espaciado (si hay pocas, se completan con el grupo recomendado).
+2. **Punto débil**: el ejercicio que indican las mismas reglas de las recomendaciones (cambios de acorde si llegas tarde, ritmo si te adelantas o retrasas, modo guiado si fallas notas). Sin datos suficientes, un calentamiento de escalas o arpegios.
+3. **Canción**: la sección más floja de tus canciones. Si aún no has practicado ninguna, acompañar una canción tocando solo el bajo.
+4. **Oído**: 5 preguntas de tocar de oído, del ejercicio en el que tienes peor precisión reciente.
+5. **Algo nuevo**: una progresión que aún no has practicado.
+
+Cada paso explica *por qué* está ahí y se puede saltar. El plan se fija al generarse (se guarda por fecha, así que puedes cerrar la app y retomarlo) y al final muestra un resumen. *Recalcular* lo vuelve a generar con tus datos de ese momento.
+
+### Acompañar con cifrados (Canciones → *Acompañar*)
+
+Solo ves los acordes de la canción (C – G/B – Am – F…), eliges un patrón para la mano izquierda (*solo el bajo*, *bloque*, *pop*, *balada 1-5-8-5*, *arpegio* o *bajo y acorde / vals*) y la app toca la melodía. Funciona con las canciones de la biblioteca, las creadas con `/cancion` y las importadas, siempre que tengan acordes.
+
+- **Evaluación armónica** (`src/core/scoring/comping.ts`): vale **cualquier posición u octava** del acorde. Para cada acorde se mira qué parte de lo que tocas pertenece al acorde (*armonía*) y si la primera nota del acorde nuevo llega dentro de la ventana de tolerancia (*cambios a tiempo*, la del nivel × 1,25 × escala por tempo). Puntuación = 100 × (0,55 × armonía + 0,45 × cambios a tiempo). Que la nota más grave sea la del cifrado (en G/B, Si) se informa pero no resta. Un mismo acorde repetido seguido cuenta como uno solo.
+- El patrón es la guía: *Escuchar* lo toca junto a la melodía y, con *Ayudas* y la vista *Notas*, lo ves caer. El retraso medio en los cambios alimenta las recomendaciones.
+
+### Oído (Practicar → *Oído*, ruta `#/practice/oido`)
+
+- **Reconocer** (respondes con botones o con las teclas 1…9): *mayor o menor* (y después disminuido, aumentado y séptimas), *¿qué inversión?* (el bajo siempre suena en la misma zona para que la altura no delate la respuesta) e *intervalos*. Si fallas, puedes escuchar tu respuesta y la correcta una detrás de otra.
+- **Tocar de oído** (respondes en el teclado, evaluado con MIDI): *toca el acorde que oyes* (cualquier octava; la nota grave debe coincidir) y *repite la melodía*: frases de 3 a 6 notas; te damos la primera y sacas el resto. Solo avanza con la nota correcta y vale en otra octava.
+- Niveles por ejercicio; con 8 de las últimas 10 bien, la app propone subir. Las respuestas tocadas con eventos simulados no se guardan. Código: `src/core/ear/ear.ts`.
+
 ## 5. Evaluación (scoring)
 
 Todo el cálculo es determinista. Está en `src/core/scoring/evaluate.ts` y cubierto por pruebas.
@@ -139,7 +164,7 @@ Todo el cálculo es determinista. Está en `src/core/scoring/evaluate.ts` y cubi
 
    R, D y V son las medias de precisión rítmica, de duración y de dinámica de las notas acertadas. R vale 100 % dentro de la ventana «perfecta» y baja hasta 25 % en el borde. **Las dimensiones que un ejercicio no evalúa (duración, dinámica) se excluyen de la fórmula.**
 6. Niveles **Principiante / Intermedio / Avanzado / Personalizado**, ajustables en *Configuración → Evaluación* (ventanas, simultaneidad, duración, velocidad, pesos y λ).
-7. **Modo guiado (espera)**: la música se detiene hasta que tocas las notas correctas, así que solo cuentan las pulsaciones erróneas, no el ritmo. **Improvisación**: porcentaje de notas dentro de la escala × actividad.
+7. **Modo guiado (espera)**: la música se detiene hasta que tocas las notas correctas, así que solo cuentan las pulsaciones erróneas, no el ritmo. **Improvisación**: porcentaje de notas dentro de la escala × actividad. **Acompañar con cifrados**: evaluación armónica, independiente de la posición del acorde (ver arriba).
 
 La compensación de latencia (calibración) se resta a la marca de tiempo de cada evento MIDI (`MIDIMessageEvent.timeStamp`). Ese reloj es el mismo `performance.now()` que se usa para programar el audio (convertido al reloj del `AudioContext`) y para dibujar las notas.
 
@@ -157,6 +182,9 @@ src/
     curriculum/            programa didáctico de 5 niveles
     storage/               IndexedDB (intentos, lecciones, canciones, ajustes) + exportar/importar
     progress/              estadísticas, racha, habilidades, recomendaciones
+    chords/                entrenador de acordes y progresiones con inversiones
+    ear/                   entrenamiento auditivo (preguntas, evaluación, niveles)
+    daily/                 plan de «Práctica de hoy»
   state/                   estado global (Zustand): ajustes, biblioteca, progreso
   ui/                      componentes (teclado, notas descendentes, piano roll, acordes, resultados) y páginas
 canciones/                 canciones creadas con /cancion (+ esquema JSON)
@@ -184,8 +212,8 @@ public/samples/salamander  muestras de piano (CC-BY 3.0)
 
 ## 7. Pruebas
 
-- **Unitarias e integración (Vitest)**: conversión de notas y convenciones de octava, Note On/Off (incluido 8nH con velocidad 64 y Note On con velocidad 0), bus de entrada, detección de acordes, emparejamiento con notas repetidas y acordes, ventanas, ritmo, duración, fórmula, modo espera, sesión con reloj simulado (latencia, tempo, retroceso, eventos simulados), validación de arreglos, adaptación de rango y niveles, **validación de los 47 ejercicios y las canciones incluidas**, conversión y validación de archivos de canción (tipo de arreglo, confianza, rango, notación), validación de todos los `canciones/*.json` del proyecto, IndexedDB y exportación, estadísticas y recomendaciones.
-- **Interfaz (Playwright, `e2e/`)**: recorre todas las secciones sin errores de consola, detecta un acorde tocado, ejecuta el simulador, completa una lección guiada con el ratón y una escala con tempo con el teclado del ordenador (con una nota tarde y otra omitida a propósito), comprueba que el historial se guarda y que una canción de `canciones/` aparece y se abre. En el entrenador de acordes responde tarjetas y un examen con el teclado del ordenador, con una inversión equivocada a propósito (se espera 90/100), y comprueba que el examen queda en Progreso.
+- **Unitarias e integración (Vitest)**: conversión de notas y convenciones de octava, Note On/Off (incluido 8nH con velocidad 64 y Note On con velocidad 0), bus de entrada, detección de acordes, emparejamiento con notas repetidas y acordes, ventanas, ritmo, duración, fórmula, modo espera, sesión con reloj simulado (latencia, tempo, retroceso, eventos simulados), validación de arreglos, adaptación de rango y niveles, **validación de los 47 ejercicios y las canciones incluidas**, conversión y validación de archivos de canción (tipo de arreglo, confianza, rango, notación), validación de todos los `canciones/*.json` del proyecto, IndexedDB y exportación, estadísticas y recomendaciones, entrenador de acordes, evaluación de acompañamiento (posiciones, cambios tarde, notas fuera del acorde, acordes repetidos), patrones de mano izquierda, preguntas de oído y plan diario.
+- **Interfaz (Playwright, `e2e/`)**: recorre todas las secciones sin errores de consola, detecta un acorde tocado, ejecuta el simulador, completa una lección guiada con el ratón y una escala con tempo con el teclado del ordenador (con una nota tarde y otra omitida a propósito), comprueba que el historial se guarda y que una canción de `canciones/` aparece y se abre. En el entrenador de acordes responde tarjetas y un examen con el teclado del ordenador, con una inversión equivocada a propósito (se espera 90/100), y comprueba que el examen queda en Progreso. En oído responde una pregunta y repite una melodía; acompaña Estrellita con un acorde mal y otro omitido a propósito (se espera 71/100); completa el paso de tarjetas de *Práctica de hoy*, salta el resto y comprueba el resumen y que el plan se conserva al recargar.
 - **Simulador** (*Configuración → Simulador*): genera eventos y perfiles de error para verificar el motor sin el teclado. **Todo lo simulado se marca como SIMULADO y nunca se guarda en el progreso.**
 
 ## 8. Estado de validación y limitaciones

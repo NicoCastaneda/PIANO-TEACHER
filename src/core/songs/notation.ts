@@ -41,7 +41,7 @@ export function chordSeq(text: string, start = 0): ChordEvent[] {
   return out
 }
 
-export type LeftHandStyle = 'block' | 'root' | 'root-fifth' | 'broken' | 'alberti' | 'bass-chord'
+export type LeftHandStyle = 'block' | 'root' | 'root-fifth' | 'broken' | 'alberti' | 'bass-chord' | 'pulse' | 'ballad'
 
 /**
  * Genera la mano izquierda a partir de los acordes, con conducción de voces cercana
@@ -51,7 +51,8 @@ export function leftHandFromChords(chords: ChordEvent[], style: LeftHandStyle = 
   const out: SongNote[] = []
   let prev: number[] = []
   for (const c of chords) {
-    const p = parseChordSymbol(c.symbol)!
+    const p = parseChordSymbol(c.symbol)
+    if (!p) continue
     const triadType = CHORD_TYPE_BY_ID[p.typeId].intervals.length > 4 ? '7' : p.typeId
     const voicing = nearestVoicing(prev, p.rootPc, triadType, 52).filter((n) => n >= 43 && n <= 64)
     const v = voicing.length ? voicing : nearestVoicing([], p.rootPc, triadType, 52)
@@ -79,6 +80,20 @@ export function leftHandFromChords(chords: ChordEvent[], style: LeftHandStyle = 
         const pattern = [v[0], v[2] ?? v[1], v[1], v[2] ?? v[1]]
         const n = Math.round(c.duration * 2)
         for (let i = 0; i < n; i++) add(pattern[i % 4], c.start + i * 0.5, 0.5)
+        break
+      }
+      case 'pulse': {
+        // acorde en cada pulso (pop)
+        for (let b = 0; b < c.duration - 1e-6; b++) v.forEach((x) => add(x, c.start + b, Math.min(1, c.duration - b) * 0.9))
+        break
+      }
+      case 'ballad': {
+        // balada 1-5-8-5: bajo, quinta, octava, quinta en negras
+        const fifthPc = (p.rootPc + (CHORD_TYPE_BY_ID[p.typeId].intervals[2] ?? 7)) % 12
+        let fifth = bass + 1
+        while (fifth % 12 !== fifthPc) fifth++
+        const cycle = [bass, fifth, bass + 12, fifth]
+        for (let b = 0; b < c.duration - 1e-6; b++) add(cycle[b % 4], c.start + b, Math.min(1, c.duration - b))
         break
       }
       case 'bass-chord': {

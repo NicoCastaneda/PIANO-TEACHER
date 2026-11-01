@@ -14,6 +14,38 @@ export function buildAttempt(r: SessionResult, cfg: SessionConfig, meta: { kind:
   if (r.played.length === 0) return null
   const ev = r.evaluation
   const chordSymbols = r.timeline.chords
+  const comp = r.comping
+  if (comp) {
+    let run = 0
+    let best = 0
+    for (const o of comp.outcomes) best = Math.max(best, (run = o.status === 'ok' ? run + 1 : 0))
+    return {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      at: Date.now(),
+      kind: meta.kind,
+      refId: meta.refId,
+      title: meta.title,
+      mode: 'timed',
+      score: r.score,
+      // en el acompañamiento, "notas correctas" = notas que pertenecen al acorde que suena
+      noteAccuracy: comp.harmony,
+      timingScore: comp.punctuality,
+      durationScore: null,
+      meanOffsetMs: comp.meanLagMs,
+      stdDevMs: null,
+      counts: { expected: comp.counts.chords, hits: comp.counts.ok, wrong: comp.counts.wrong, octave: 0, missed: comp.counts.missed, extra: 0, early: comp.counts.early, late: comp.counts.late },
+      chords: { total: comp.counts.chords, complete: comp.outcomes.filter((o) => o.status !== 'wrong' && o.status !== 'missed').length, simultaneous: 0 },
+      bestStreak: best,
+      practiceSec: r.practiceSec,
+      skills: meta.skills,
+      tolerance: meta.tolerance,
+      tempoFactor: cfg.tempoFactor,
+      hands: 'L',
+      chordResults: comp.outcomes.map((o) => ({ symbol: o.symbol, complete: o.status !== 'wrong' && o.status !== 'missed' })),
+      chordChangeLagMs: comp.meanLagMs,
+      input: r.input,
+    }
+  }
   return {
     id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     at: Date.now(),

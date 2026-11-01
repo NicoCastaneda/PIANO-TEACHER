@@ -1,6 +1,8 @@
 import { audioEngine } from '../audio/AudioEngine'
 import { inputBus } from '../midi/inputBus'
 import type { InputSource, MusicEvent } from '../midi/types'
+import { evaluateComping, type CompingResult } from '../scoring/comping'
+import { tempoScale } from '../scoring/tolerance'
 import { effectiveWindowsMs, evaluatePerformance, evaluateWaitMode, type WaitStepRecord } from '../scoring/evaluate'
 import type { EvaluationOptions, EvaluationResult, ExpectedNote, PlayedNote } from '../scoring/types'
 import { toTimeline, type Timeline } from '../songs/adapt'
@@ -19,7 +21,8 @@ import { inScaleRatio } from './exercises'
  * La compensación de latencia (calibración) se resta a los eventos de entrada.
  */
 
-export type SessionMode = 'wait' | 'timed' | 'improv' | 'listen'
+/** comp = acompañar con cifrados: la app toca la melodía y se evalúa la armonía (scoring/comping.ts) */
+export type SessionMode = 'wait' | 'timed' | 'improv' | 'listen' | 'comp'
 export type SessionStatus = 'idle' | 'countin' | 'playing' | 'waiting' | 'paused' | 'finished'
 export type AssistLevel = 'full' | 'reduced' | 'none'
 
@@ -52,6 +55,7 @@ export interface SessionResult {
   evaluation?: EvaluationResult
   wait?: ReturnType<typeof evaluateWaitMode>
   improv?: { score: number; inScale: number; notes: number; formula: string }
+  comping?: CompingResult
   score: number
   practiceSec: number
   played: PlayedNote[]
@@ -334,7 +338,10 @@ export class PracticeSession {
       this.openPlayed.set(e.note, p)
       if (this.cfg.mode === 'timed') this.judgeLive(p)
       else if (this.cfg.mode === 'wait') this.judgeWait(e.note)
-      else if (this.cfg.mode === 'improv') this.flash(e.note, inScaleRatio([e.note], this.cfg.improv?.rootPc ?? 0, this.cfg.improv?.scaleId ?? 'major') ? 'hit' : 'wrong')
+      else if (this.cfg.mode === 'comp') {
+        const c = this.timeline.chords.find((x) => x.start - 0.25 <= songT && x.start + x.duration > songT)
+        this.flash(e.note, c && c.pcs.includes(((e.note % 12) + 12) % 12) ? 'hit' : 'wrong')
+      } else if (this.cfg.mode === 'improv') this.flash(e.note, inScaleRatio([e.note], this.cfg.improv?.rootPc ?? 0, this.cfg.improv?.scaleId ?? 'major') ? 'hit' : 'wrong')
     } else {
       const p = this.openPlayed.get(e.note)
       if (p) {
@@ -444,6 +451,15 @@ export class PracticeSession {
     } else if (this.cfg.mode === 'wait') {
       const wait = evaluateWaitMode(this.waitRecords, this.cfg.evaluation.extraPenalty)
       result = { ...base, mode: 'wait', wait, score: wait.score }
+    } else if (this.cfg.mode === 'comp') {
+      const tol = this.cfg.evaluation.tolerance
+      const comping = evaluateComping(
+        this.timeline.chords.filter((c) => c.start >= this.evalFrom - 1e-6),
+        this.played.filter((p) => p.start >= this.evalFrom - 0.5),
+        // ventana algo más amplia que la de nota exacta: se juzga el cambio de acorde, no cada nota
+        { windowMs: Math.round(tol.hitWindowMs * 1.25 * tempoScale(this.beatSec)), groupMs: Math.max(120, tol.chordSpreadMs * 1.5) },
+      )
+      result = { ...base, mode: 'comp', comping, score: comping.score, chordChangeLagMs: comping.meanLagMs }
     } else if (this.cfg.mode === 'improv') {
       const notes = this.played.map((p) => p.midi)
       const ratio = inScaleRatio(notes, this.cfg.improv?.rootPc ?? 0, this.cfg.improv?.scaleId ?? 'major')

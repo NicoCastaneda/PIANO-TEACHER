@@ -1,7 +1,10 @@
 import { useRoute } from './lib/router'
 import { Shell } from './ui/layout/Shell'
 import { HomePage } from './ui/pages/HomePage'
+import { TodayPage } from './ui/pages/TodayPage'
 import { KeyboardPage } from './ui/pages/KeyboardPage'
+import { AccompanyPage } from './ui/pages/AccompanyPage'
+import { EarTrainingPage } from './ui/pages/ear/EarTrainingPage'
 import { ChordTrainerPage } from './ui/pages/chords/ChordTrainerPage'
 import { LearnPage, LessonPage } from './ui/pages/LearnPage'
 import { PracticePage } from './ui/pages/PracticePage'
@@ -21,10 +24,14 @@ export function App() {
       page = param === 'acordes' ? <ChordTrainerPage tab={route.query.get('tab')} /> : param ? <LessonPage key={param} lessonId={param} /> : <LearnPage />
       break
     case 'practice':
-      page = <PracticePage preset={param} />
+      page = param === 'oido' ? <EarTrainingPage key={route.query.get('ej') ?? ''} drill={route.query.get('ej')} /> : <PracticePage preset={param} />
       break
     case 'songs':
-      page = param ? <SongPage key={param} songId={param} sectionId={route.query.get('section')} /> : <SongsPage />
+      page =
+        param && route.segments[2] === 'acompanar' ? <AccompanyPage key={param} songId={param} /> : param ? <SongPage key={param} songId={param} sectionId={route.query.get('section')} /> : <SongsPage />
+      break
+    case 'hoy':
+      page = <TodayPage />
       break
     case 'keyboard':
       page = <KeyboardPage />

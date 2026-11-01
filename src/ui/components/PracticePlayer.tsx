@@ -37,20 +37,22 @@ export interface PracticePlayerProps {
   onNext?: () => void
   nextLabel?: string
   extraHeader?: ReactNode
+  defaultView?: ViewKind
+  defaultAssist?: AssistLevel
 }
 
-const MODE_LABEL: Record<SessionMode, string> = { wait: 'Guiado (espera)', timed: 'Con tempo', listen: 'Escuchar', improv: 'Improvisar' }
+const MODE_LABEL: Record<SessionMode, string> = { wait: 'Guiado (espera)', timed: 'Con tempo', listen: 'Escuchar', improv: 'Improvisar', comp: 'Acompañar' }
 
 export function PracticePlayer(p: PracticePlayerProps) {
   const settings = useSettings()
   const [mode, setMode] = useState<SessionMode>(p.defaultMode ?? 'timed')
   const [hands, setHands] = useState<'both' | 'R' | 'L'>(p.defaultHands ?? 'both')
   const [tempo, setTempo] = useState(p.arrangement.difficulty === 'beginner' || p.challenge ? 1 : 1)
-  const [view, setView] = useState<ViewKind>('falling')
-  const [assist, setAssist] = useState<AssistLevel>(p.challenge ? 'none' : 'full')
+  const [view, setView] = useState<ViewKind>(p.defaultView ?? 'falling')
+  const [assist, setAssist] = useState<AssistLevel>(p.challenge ? 'none' : (p.defaultAssist ?? 'full'))
   const [sectionId, setSectionId] = useState<string | null>(p.initialSectionId ?? null)
   const [loop, setLoop] = useState(false)
-  const [metronome, setMetronome] = useState(mode === 'timed')
+  const [metronome, setMetronome] = useState(mode === 'timed' || mode === 'comp')
   const [result, setResult] = useState<SessionResult | null>(null)
   const [saved, setSaved] = useState(false)
   const [assistHint, setAssistHint] = useState<string | null>(null)
@@ -301,7 +303,7 @@ export function PracticePlayer(p: PracticePlayerProps) {
           ))}
         </div>
 
-        {hasLH && hasRH && mode !== 'improv' && (
+        {hasLH && hasRH && mode !== 'improv' && mode !== 'comp' && (
           <div className="seg" role="group" aria-label="Manos">
             {(
               [

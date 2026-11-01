@@ -7,6 +7,7 @@ import { useHeldNotes, useMidiState } from '../../lib/hooks'
 import { useProgress } from '../../state/library'
 import { PianoKeyboard } from '../components/PianoKeyboard'
 import { recTarget } from './ProgressPage'
+import { TodayCard } from './TodayPage'
 
 function fmtDuration(sec: number) {
   const m = Math.round(sec / 60)
@@ -97,6 +98,8 @@ export function HomePage() {
         </div>
       </section>
 
+      <TodayCard />
+
       {/* Resumen */}
       <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Tile icon={<Flame size={18} />} label="Racha" value={sum.streak.current ? `${sum.streak.current} día${sum.streak.current > 1 ? 's' : ''}` : '—'} sub={sum.streak.best ? `Mejor: ${sum.streak.best}` : 'Practica hoy para empezar'} color="var(--miss)" />
@@ -136,7 +139,7 @@ export function HomePage() {
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-sm font-semibold">{a.title}</div>
                       <div className="text-xs text-muted">
-                        {new Date(a.at).toLocaleString('es', { dateStyle: 'medium', timeStyle: 'short' })} · {a.mode === 'wait' ? 'guiado' : a.mode === 'improv' ? 'improvisación' : 'con tempo'}
+                        {new Date(a.at).toLocaleString('es', { dateStyle: 'medium', timeStyle: 'short' })} · {a.refId.startsWith('acomp:') ? 'acompañamiento' : a.mode === 'wait' ? 'guiado' : a.mode === 'improv' ? 'improvisación' : 'con tempo'}
                       </div>
                     </div>
                   </div>

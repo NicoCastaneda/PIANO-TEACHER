@@ -14,6 +14,7 @@ vi.mock('../audio/AudioEngine', () => ({
 const { PracticeSession } = await import('./PracticeSession')
 const { inputBus } = await import('../midi/inputBus')
 const { melodyExercise } = await import('./exercises')
+const { chordSeq } = await import('../songs/notation')
 const { defaultEvaluationOptions, TOLERANCE_PRESETS } = await import('../scoring/tolerance')
 
 const evaluation = defaultEvaluationOptions({ tolerance: TOLERANCE_PRESETS.intermediate })
@@ -72,6 +73,22 @@ describe('PracticeSession', () => {
     expect(s.status).toBe('finished')
     expect(s.lastResult!.wait!.wrongPresses).toBe(1)
     expect(s.lastResult!.wait!.cleanSteps).toBe(3)
+  })
+
+  it('modo acompañar: la app toca la melodía y se evalúa la armonía de cada cambio, en cualquier posición', async () => {
+    const song = melodyExercise('c', 'Comp', 'C4 D4 E4 F4', { bpm: 60, lh: 'C3:4', chords: chordSeq('C:2 G:2') })
+    const s = new PracticeSession({ arrangement: song, mode: 'comp', hands: 'L', tempoFactor: 1, loop: false, metronome: false, countInBars: 0, playAccompaniment: true, latencyMs: 0, evaluation })
+    await s.start()
+    const t0 = performance.now() + 80
+    ;[48, 52, 55].forEach((m) => press(m, t0 + 10, 1.5)) // C en estado fundamental
+    ;[47, 50, 55].forEach((m) => press(m, t0 + 2040, 1.5)) // G/B: otra posición, también vale
+    vi.advanceTimersByTime(5000)
+    const r = s.lastResult!
+    expect(r.mode).toBe('comp')
+    expect(r.comping!.outcomes.map((o) => o.status)).toEqual(['ok', 'ok'])
+    expect(r.score).toBe(100)
+    expect(scheduled.some((n) => n.midi === 60)).toBe(true) // melodía reproducida
+    expect(scheduled.some((n) => n.midi === 48)).toBe(false) // la izquierda la toca el alumno
   })
 
   it('los eventos simulados se identifican como tales en el resultado', async () => {

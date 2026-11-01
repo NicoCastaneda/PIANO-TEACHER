@@ -1,4 +1,4 @@
-import { ArrowLeft, CheckCircle2, ChevronRight, Circle, GraduationCap, Layers, ListMusic, Lock, Play, Sparkles, Target, Volume2 } from 'lucide-react'
+import { ArrowLeft, CheckCircle2, ChevronRight, Circle, Ear, GraduationCap, Layers, ListMusic, Lock, Play, Sparkles, Target, Volume2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { audioEngine } from '../../core/audio/AudioEngine'
 import { ALL_LESSONS, CURRICULUM, LESSON_BY_ID, lessonStates, type Lesson } from '../../core/curriculum/curriculum'
@@ -24,7 +24,7 @@ export function LearnPage() {
         title="Aprender"
         subtitle="Un programa progresivo desde cero hasta nivel avanzado. Cada lección: ver, escuchar, entender, practicar con tu Casio y recibir una evaluación real."
       />
-      <a href={href('/learn/acordes')} className="card group relative mb-8 flex flex-wrap items-center gap-4 overflow-hidden p-5 transition-transform hover:-translate-y-0.5">
+      <a href={href('/learn/acordes')} className="card group relative mb-3 flex flex-wrap items-center gap-4 overflow-hidden p-5 transition-transform hover:-translate-y-0.5">
         <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full opacity-25 blur-3xl" style={{ background: 'var(--accent-2)' }} />
         <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl text-white" style={{ background: 'linear-gradient(135deg, var(--accent), var(--accent-2))' }}>
           <Layers size={22} />
@@ -43,6 +43,16 @@ export function LearnPage() {
               <ListMusic size={11} /> Progresiones con inversiones
             </span>
           </div>
+        </div>
+        <ChevronRight size={20} className="relative text-muted transition-transform group-hover:translate-x-1" />
+      </a>
+      <a href={href('/practice/oido')} className="card group relative mb-8 flex flex-wrap items-center gap-4 overflow-hidden p-5 transition-transform hover:-translate-y-0.5">
+        <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl text-white" style={{ background: 'linear-gradient(135deg, var(--rh), var(--accent))' }}>
+          <Ear size={22} />
+        </div>
+        <div className="relative min-w-0 flex-1">
+          <div className="text-lg font-extrabold">Oído: reconocer y sacar de oído</div>
+          <div className="text-sm text-muted">Distingue mayor y menor, inversiones e intervalos; repite en tu teclado acordes y melodías que solo escuchas.</div>
         </div>
         <ChevronRight size={20} className="relative text-muted transition-transform group-hover:translate-x-1" />
       </a>

@@ -4,6 +4,7 @@ import { midiToName } from '../../core/music/notes'
 import type { SessionResult } from '../../core/practice/PracticeSession'
 import type { EvaluationResult } from '../../core/scoring/types'
 import { noteNameOpts, useSettings } from '../../state/settings'
+import { CompingResults } from './CompingResults'
 import { ResultTimeline } from './PianoRoll'
 
 export function feedbackFor(ev: EvaluationResult): { tone: 'good' | 'warn' | 'info'; text: string }[] {
@@ -114,8 +115,10 @@ export function ResultsView({ result, passScore, onRetry, onNext, nextLabel, onP
           )}
           {result.wait && <p className="mt-2 text-sm text-muted">Modo guiado: la música esperó a que tocaras cada nota, así que solo se cuentan los errores (no el ritmo).</p>}
           {result.improv && <p className="mt-2 text-sm text-muted">{Math.round(result.improv.inScale * 100)} % de tus {result.improv.notes} notas pertenecen a la escala.</p>}
+          {result.comping && <p className="mt-2 text-sm text-muted">Acompañamiento con cifrados: vale cualquier posición u octava del acorde; se evalúa la armonía y la llegada a cada cambio.</p>}
         </div>
       </div>
+      {result.comping && <CompingResults c={result.comping} />}
 
       {ev && (
         <>
@@ -207,7 +210,7 @@ export function ResultsView({ result, passScore, onRetry, onNext, nextLabel, onP
       <details className="text-xs text-muted">
         <summary className="cursor-pointer font-semibold">¿Cómo se calcula la puntuación?</summary>
         <div className="mt-2 space-y-1 font-mono">
-          <div>{ev?.breakdown.formula ?? result.wait?.formula ?? result.improv?.formula}</div>
+          <div>{ev?.breakdown.formula ?? result.wait?.formula ?? result.improv?.formula ?? result.comping?.formula}</div>
           {ev && (
             <div>
               N = {ev.breakdown.noteScore.toFixed(3)} · R = {ev.breakdown.timingScore?.toFixed(3) ?? '—'} · D = {ev.breakdown.durationScore?.toFixed(3) ?? '—'} · V = {ev.breakdown.dynamicsScore?.toFixed(3) ?? '—'}

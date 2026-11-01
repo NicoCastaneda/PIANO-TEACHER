@@ -5,6 +5,7 @@ import { dailySeries, recommendations, skillStats, summary, type Recommendation 
 import { exportAll, importAll } from '../../core/storage/db'
 import { href } from '../../lib/router'
 import { CopyLine } from './SongsPage'
+import { useEarTrainer } from '../../state/earTrainer'
 import { useChordTrainer } from '../../state/chordTrainer'
 import { useLibrary, useProgress } from '../../state/library'
 import { useSettings } from '../../state/settings'
@@ -30,7 +31,7 @@ export function DataTransfer() {
   const fileRef = useRef<HTMLInputElement>(null)
   const [msg, setMsg] = useState<string | null>(null)
   const reload = async () => {
-    await Promise.all([useProgress.getState().load(), useLibrary.getState().load(), useSettings.getState().load(), useChordTrainer.getState().load()])
+    await Promise.all([useProgress.getState().load(), useLibrary.getState().load(), useSettings.getState().load(), useChordTrainer.getState().load(), useEarTrainer.getState().load()])
   }
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -185,7 +186,7 @@ export function ProgressPage() {
                     <tr key={a.id} className="border-t border-border">
                       <td className="py-1.5 pr-3 whitespace-nowrap text-muted">{new Date(a.at).toLocaleString('es', { dateStyle: 'short', timeStyle: 'short' })}</td>
                       <td className="py-1.5 pr-3">{a.title}</td>
-                      <td className="py-1.5 pr-3 text-muted">{a.refId.startsWith('chord-exam') ? 'Examen' : a.mode === 'wait' ? 'Guiado' : a.mode === 'improv' ? 'Improv.' : a.kind === 'challenge' ? 'Desafío' : 'Tempo'}</td>
+                      <td className="py-1.5 pr-3 text-muted">{a.refId.startsWith('chord-exam') ? 'Examen' : a.refId.startsWith('acomp:') ? 'Acomp.' : a.mode === 'wait' ? 'Guiado' : a.mode === 'improv' ? 'Improv.' : a.kind === 'challenge' ? 'Desafío' : 'Tempo'}</td>
                       <td className="py-1.5 pr-3 text-right font-bold tabular-nums">{Math.round(a.score)}</td>
                       <td className="py-1.5 pr-3 text-right tabular-nums">{Math.round(a.noteAccuracy * 100)} %</td>
                       <td className="py-1.5 pr-3 text-right tabular-nums">{a.timingScore === null ? '—' : `${Math.round(a.timingScore * 100)} %`}</td>

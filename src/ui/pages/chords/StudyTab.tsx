@@ -30,7 +30,21 @@ import { PianoKeyboard, type KeyMark } from '../../components/PianoKeyboard'
 import { baseSymbol, feedbackText, judgeMarks, MasteryBar, STATUS_COLOR } from './common'
 import { useChordGesture } from './useChordGesture'
 
-export function StudyTab({ groupId, initialCards, onClearReview }: { groupId: string; initialCards?: ChordCard[]; onClearReview?: () => void }) {
+export function StudyTab({
+  groupId,
+  initialCards,
+  onClearReview,
+  reviewLabel,
+  onAnswer,
+}: {
+  groupId: string
+  initialCards?: ChordCard[]
+  onClearReview?: () => void
+  /** texto del aviso cuando se repasa una lista concreta de tarjetas */
+  reviewLabel?: string
+  /** se llama una vez por tarjeta resuelta (correct = a la primera) */
+  onAnswer?: (a: { correct: boolean; recorded: boolean }) => void
+}) {
   const style = useSettings((s) => s.namingStyle)
   const { stats, record, hand } = useChordTrainer()
   const group = GROUP_BY_ID[groupId]
@@ -78,6 +92,7 @@ export function StudyTab({ groupId, initialCards, onClearReview }: { groupId: st
         // primer intento sin ayuda = acierto; si antes falló o vio la respuesta, cuenta como repaso
         if (!simulated) record(card.id, { correct: !failed, revealed: revealed || hint, ms })
         setSession((s) => ({ ok: s.ok + (failed ? 0 : 1), bad: s.bad, streak: failed ? 0 : s.streak + 1 }))
+        onAnswer?.({ correct: !failed, recorded: !simulated })
         advanceTimer.current = setTimeout(() => next(), 1100)
       } else if (!failed) {
         setFailed(true)
@@ -102,10 +117,12 @@ export function StudyTab({ groupId, initialCards, onClearReview }: { groupId: st
     <div className="space-y-4">
       {initialCards ? (
         <div className="flex flex-wrap items-center gap-2 rounded-xl border border-miss/40 bg-miss/10 px-4 py-2 text-sm">
-          Repasando las {initialCards.length} tarjetas que fallaste en el examen.
-          <button className="btn btn-sm btn-ghost ml-auto" onClick={onClearReview}>
-            Volver al grupo
-          </button>
+          {reviewLabel ?? `Repasando las ${initialCards.length} tarjetas que fallaste en el examen.`}
+          {onClearReview && (
+            <button className="btn btn-sm btn-ghost ml-auto" onClick={onClearReview}>
+              Volver al grupo
+            </button>
+          )}
         </div>
       ) : (
         <div className="card space-y-3 p-5">

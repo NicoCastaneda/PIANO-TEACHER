@@ -1,10 +1,11 @@
-import { Dices, Flame } from 'lucide-react'
+import { Dices, Ear, Flame } from 'lucide-react'
 import { useMemo, useState, type ReactNode } from 'react'
 import { midiToName } from '../../core/music/notes'
 import { CHORD_TYPES, COMMON_PROGRESSIONS, SCALE_TYPES } from '../../core/music/theory'
 import { arpeggioExercise, chordsExercise, findNotesExercise, progressionExercise, rhythmExercise, scaleExercise, type Skill } from '../../core/practice/exercises'
 import type { SessionMode } from '../../core/practice/PracticeSession'
 import type { LeftHandStyle } from '../../core/songs/notation'
+import { href } from '../../lib/router'
 import { noteNameOpts, useSettings } from '../../state/settings'
 import { PageHeader } from '../layout/Shell'
 import { PracticePlayer } from '../components/PracticePlayer'
@@ -159,9 +160,14 @@ export function PracticePage({ preset }: { preset?: string }) {
         title="Practicar"
         subtitle="Ejercicios configurables de técnica, ritmo, notas, acordes y patrones. Ajusta el tempo y practica progresivamente."
         actions={
-          <button className="btn" onClick={() => setChallenge(!challenge)} style={challenge ? { borderColor: 'var(--bad)', color: 'var(--bad)' } : undefined} title="Tolerancia avanzada y sin ayudas visuales">
-            <Flame size={16} /> Modo desafío {challenge ? 'activado' : ''}
-          </button>
+          <>
+            <a className="btn" href={href('/practice/oido')}>
+              <Ear size={16} /> Oído
+            </a>
+            <button className="btn" onClick={() => setChallenge(!challenge)} style={challenge ? { borderColor: 'var(--bad)', color: 'var(--bad)' } : undefined} title="Tolerancia avanzada y sin ayudas visuales">
+              <Flame size={16} /> Modo desafío {challenge ? 'activado' : ''}
+            </button>
+          </>
         }
       />
       <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
